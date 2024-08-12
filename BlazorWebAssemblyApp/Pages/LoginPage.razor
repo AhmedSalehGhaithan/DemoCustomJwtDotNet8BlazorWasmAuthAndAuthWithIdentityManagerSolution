@@ -1,0 +1,73 @@
+﻿@page "/login"
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavManager
+@using BlazorWebAssemblyApp.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@using SharedClassLibrary.Contracts
+@using SharedClassLibrary.DTOs
+@inject IUserAccount AccountService
+@inject IJSRuntime js
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Enhance Model="User" OnValidSubmit="HandleLogin">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="card-header">Login An Account</div>
+                <div class="card-body">
+
+                    @* Email Address *@
+                    <div class="form-group mb-3">
+                        <input @bind="User.Email"
+                               class="form-control"
+                               type="email"
+                               placeholder="Email Address">
+                        </input>
+                    </div>
+
+                    @* Password *@
+                    <div class="form-group">
+                        <div class="input-group mb-3">
+                            <input class="form-control"
+                                   @bind="User.Password"
+                                   placeholder="Password"
+                                   aria-label="Password"
+                                   aria-describedby="Password">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary float-end"
+                            type="submit">
+                        Login
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+   
+    public LoginDTO User { get; set; } = new();
+
+    async Task HandleLogin()
+    {
+        var (flag, token, message) = await AccountService.LoginAccount(User);
+        if (flag)
+        {
+            string customMessage = $"{message}{Environment.NewLine}{token}";
+            await js.InvokeVoidAsync("alert", customMessage);
+            User = new();
+
+            var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
+            await customAuthStateProvider.UpdateAuthenticationState(token);
+            NavManager.NavigateTo("/", forceLoad: true);
+        }
+
+        await js.InvokeVoidAsync("alert", message);
+        return;
+    }
+}

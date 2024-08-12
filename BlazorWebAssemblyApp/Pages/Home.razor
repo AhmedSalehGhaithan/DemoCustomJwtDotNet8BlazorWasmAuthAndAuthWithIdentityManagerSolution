@@ -1,0 +1,33 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <AuthorizeView Roles="Admin">
+                        <button class="btn btn-primary"> Admin Can Click </button>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="Admin,User">
+                        <button class="btn btn-primary"> Admin/User Can click </button>
+                    </AuthorizeView>
+                    
+                    
+                </div>
+                <div class="card-footer">
+                    <AuthorizeView>
+                        <Authorized>
+                            <h3>You are authenticated</h3>
+                            <h3>Your Role is @context.User.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Role)</h3>
+                        </Authorized>
+                        <NotAuthorized>
+                            <h3>You are not authorized</h3>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
